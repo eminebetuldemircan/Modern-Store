@@ -1,0 +1,222 @@
+﻿@using E_CommerceApplication.Dtos.CartDtos
+@model GetByIdCartDto
+
+<!-- hidden customer id so JS can read it -->
+<input type="hidden" id="customerId" name="customerId" value="7" />
+
+<div class="container-fluid pt-5">
+    <div class="row px-xl-5">
+        <div class="col-lg-8">
+            <div class="mb-4">
+                <h4 class="font-weight-semi-bold mb-4">Sipariş Bilgileri</h4>
+                <div class="row">
+                   @if(Model.Customer == null)
+                    {
+                    <div class="col-md-6 form-group">
+                        <label>Ad</label>
+                        <input class="form-control" type="text" placeholder="Ad" name="customerName" id="customerName" required>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Soyad</label>
+                        <input class="form-control" type="text" placeholder="Soyad" name="customerSurname" id="customerSurname" required>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>E-mail</label>
+                        <input class="form-control" type="text" placeholder="example@email.com" name="customerEmail" id="customerEmail" required>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Telefon</label>
+                        <input class="form-control" type="text" placeholder="5XX-XXX-XXXX" name="customerPhone" id="customerPhone" required>
+                    </div>
+                    }
+                    else
+                    {
+                    <div class="col-md-6 form-group">
+                        <label>Ad</label>
+                        <input class="form-control" type="text" placeholder="Ad" name="customerName" id="customerName" required value="@Model.Customer.FirstName">
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Soyad</label>
+                        <input class="form-control" type="text" placeholder="Soyad" name="customerSurname" id="customerSurname" required value="@Model.Customer.LastName">
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>E-mail</label>
+                        <input class="form-control" type="text" placeholder="example@email.com" name="customerEmail" id="customerEmail" required value="@Model.Customer.Email">
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Telefon</label>
+                        <input class="form-control" type="text" placeholder="5XX-XXX-XXXX" name="customerPhone" id="customerPhone" required value="@Model.Customer.PhoneNumber">
+                    </div>
+                      
+                       
+                    }
+
+                    <div class="col-md-6 form-group">
+                        <label>Şehir</label>
+                        <select class="custom-select" id="city" name="shippingCityId">
+                            <option selected value="0">Şehir Seçiniz.</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Town</label>
+                        <select class="custom-select" id="town" name="shippingTownId">
+                            <option value="">İlçe Seçiniz.</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <label>Adres Detay</label>
+                        <input class="form-control" type="text" placeholder="Mahalle, Sokak, No:" name="shippingAdress" id="shippingAdress">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-secondary mb-5">
+                <div class="card-header bg-secondary border-0">
+                    <h4 class="font-weight-semi-bold m-0">Sipariş Toplam</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="font-weight-medium mb-3">Ürünler</h5>
+
+                    @if(Model.CartItems != null)
+                    {
+                    @foreach (var item in Model.CartItems)
+                    {
+                        <div class="d-flex justify-content-between">
+                            <p>@item.Product.ProductName x @item.Quantity</p>
+                            <p>$@item.TotalPrice</p>
+                        </div>
+                    }
+                    }
+                    else
+                    {
+                    <div class="d-flex justify-content-between">
+                        <p>Urunler Yok</p>
+                    </div>
+                    }
+
+
+                    <hr class="mt-0">
+                    <div class="d-flex justify-content-between mb-3 pt-1">
+                        <h6 class="font-weight-medium">AraToplam</h6>
+                        <h6 class="font-weight-medium">$@Model.TotalAmount</h6>
+                    </div>
+                </div>
+                <div class="card-footer border-secondary bg-transparent">
+                    <div class="d-flex justify-content-between mt-2">
+                        <h5 class="font-weight-bold">Toplam</h5>
+                        <h5 class="font-weight-bold">$@Model.TotalAmount</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="card border-secondary mb-5">
+                <div class="card-footer border-secondary bg-transparent">
+                    <button id="completeOrder" class="btn btn-lg btn-block btn-primary font-weight-bold my-3 py-3">Siparişi Tamamla</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+              $.ajax({
+        url: '/Order/GetCity',
+        type: 'GET',
+        dataType: 'json',
+        success: function (response) {
+            console.log(response);
+
+            var cityDropdown = $('#city');
+            cityDropdown.empty();
+            cityDropdown.append('<option value="0">Şehir Seçiniz.</option>');
+
+            $.each(response.data, function (index, city) {
+                cityDropdown.append(
+                    '<option value="' + city.cityId + '">' + city.cityname + '</option>'
+                );
+            });
+        },
+        error: function (xhr) {
+            console.log(xhr.responseText);
+        }
+    });
+
+           $('#city').change(function () {
+        var cityId = $(this).val();
+
+        if (cityId != "0") {
+            $.ajax({
+                url: '/Order/GetTownByCityId?cityId=' + cityId,
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    console.log(response);
+
+                    var townDropdown = $('#town');
+                    townDropdown.empty();
+                    townDropdown.append('<option value="0">İlçe Seçiniz.</option>');
+
+                    $.each(response.data, function (index, town) {
+                        townDropdown.append(
+                            '<option value="' + town.townId + '">' + town.townname + '</option>'
+                        );
+                    });
+                },
+                error: function (xhr) {
+                    console.log(xhr.responseText);
+                }
+            });
+        } else {
+            $('#town').empty().append('<option value="0">İlçe Seçiniz.</option>');
+        }
+    });
+
+        $('#completeOrder').click(function (e) {
+            e.preventDefault();
+
+
+            var orderData = {
+                customerId: $('#customerId').val(),
+                customerName: $('#customerName').val(),
+                customerSurname: $('#customerSurname').val(),
+                customerEmail: $('#customerEmail').val(),
+                customerPhone: $('#customerPhone').val(),
+                shippingCityId: $('#city').val(),
+                shippingTownId: $('#town').val(),
+                shippingAdress: $('#shippingAdress').val(),
+                totalAmount: '@Model.TotalAmount'  // Assuming this is coming from your model
+            };
+            var cartId = @Model.CartId;
+
+            // console.log(orderData);
+            if (!orderData.customerName || !orderData.customerSurname || !orderData.customerEmail ||
+                !orderData.customerPhone || !orderData.shippingCityId || orderData.shippingCityId === "0" ||
+                !orderData.shippingTownId || !orderData.shippingAdress) {
+                toastr.error('Lütfen tüm alanları doldurun.');
+                return;
+            }
+
+
+
+            $.ajax({
+                type: 'POST',
+                url: '/Order/CreateOrder',  // Replace with your controller's name
+                data: {dto:orderData,cartId:cartId
+            },
+                dataType: 'json',
+                success: function (response) {
+                console.log(response);
+                    alert('Siparisiniz basarili bir sekilde olusturuldu!');
+                    window.location.href = '@Url.Action("Index", "Home")';
+                },
+                error: function (response) {
+                    alert('Error placing order.');
+                }
+            });
+        });
+    });
+</script>
