@@ -1,0 +1,49 @@
+﻿using E_CommerceApplication.Dtos.ProductDtos;
+using E_CommerceApplication.Usecases.ProductServices;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace E_Commerce.WebApi.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ProductController : ControllerBase
+    {
+        private readonly IProductServices _productService;
+
+        public ProductController(IProductServices productService)
+        {
+            _productService = productService;
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetAllProduct()
+        {
+            var values = await _productService.GetAllProductAsync();
+            return Ok(values);
+        }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetByIdProduct(int id)
+        {
+            var values = _productService.GetByIdProductAsync(id);
+            return Ok(values);
+        }
+        [HttpPost]
+        public async Task<IActionResult> CreateProduct(CreateProductDto dto)
+        {
+            await _productService.CreateProductAsync(dto);
+            return Ok("Ürününüz başarılı bir şekilde oluşturuldu.");
+        }
+        [HttpPut]
+        public async Task<IActionResult> UpdateProduct(UpdateProductDto dto)
+        {
+            await _productService.UpdateProductAsync(dto);
+            return Ok("Ürününüz başarılı bir şekilde güncellendi.");
+        }
+        [HttpDelete]
+        public async Task<IActionResult> DeleteProduct(int id)
+        {
+            await _productService.DeleteProductAsync(id);
+            return Ok("Ürününz başarılı bir şekilde silindi.");
+        }
+    }
+}
